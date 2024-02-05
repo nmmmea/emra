@@ -2,8 +2,8 @@ from config import *  # 导入config.py中定义的全局变量
 import shutil  # 导入shutil模块，用于复制、移动、删除文件和目录
 import subprocess  # 导入subprocess模块，用于执行系统命令
 import fnmatch  # 导入fnmatch模块，用于文件名匹配
-import json  # 导入json模块，用于读写JSON格式的数据
-from apkfile import ApkFile  # 导入apkfile.py中定义的ApkFile类
+import json  # 导入json模块，用于读写JSON格
+from pyaxmlparser import APK
 
 
 def init_folder():
@@ -51,12 +51,12 @@ def extract_payload_bin(zip_files):
         subprocess.run(["unzip", f, "payload.bin"])
 
 
-def extract_product_img():
-    # 使用subprocess模块运行shell命令，执行payload-dumper-go的命令，从payload.bin文件中提取product镜像文件
+def extract_system_img():
+    # 使用subprocess模块运行shell命令，执行payload-dumper-go的命令，从payload.bin文件中提取system镜像文件
     # -c参数指定最大并发数为8，-output指定提取后的文件输出到output_img目录下
-    # -p参数指定提取product镜像，"payload.bin"为输入文件
+    # -p参数指定提取system镜像，"payload.bin"为输入文件
     subprocess.run(["./payload-dumper-go", "-c", "8", "-output",
-                    "output_img", "-p", "product", "payload.bin"])
+                    "output_img", "-p", "system", "payload.bin"])
 
     # 循环遍历output_img目录下的所有文件，执行os.rename函数将提取的文件移动到当前目录下
     for filename in os.listdir("output_img"):
@@ -65,10 +65,10 @@ def extract_product_img():
         os.rename(src_path, dst_path)
 
 
-def extract_erofs_product():
-    # 使用subprocess模块运行shell命令，执行extract.erofs的命令，提取product.img镜像文件中的文件
-    # -i参数指定输入的镜像文件为product.img，-x参数指定提取文件，-T16参数指定使用16个线程提取文件
-    subprocess.run(["./extract.erofs", "-i", "product.img", "-x", "-T16"])
+def extract_erofs_system():
+    # 使用subprocess模块运行shell命令，执行extract.erofs的命令，提取system.img镜像文件中的文件
+    # -i参数指定输入的镜像文件为system.img，-x参数指定提取文件，-T16参数指定使用16个线程提取文件
+    subprocess.run(["./extract.erofs", "-i", "system.img", "-x", "-T16"])
 
 
 def remove_some_apk(exclude_apk):
@@ -89,28 +89,28 @@ def remove_some_apk(exclude_apk):
             if "Overlay" in filename or "_Sys" in filename or "MiuiBiometric" in filename:
                 os.remove(os.path.join(root, filename))
 
-
 def rename_apk(apk_files):
     # 遍历每个apk文件
     for apk_file in apk_files:
         apk_path = os.path.join(output_dir, apk_file)
 
-        # 使用apkfile库读取apk包信息
-        apk = ApkFile(apk_path)
+        # 使用pyaxmlparser库读取apk包信息
+        apk = APK(apk_path)
 
         # 获取apk的包名和版本号
-        package_name = apk.package_name
-        version_name = apk.version_name
-        # version_code
-        # version_code = apk.version_code
+        package_name = apk.package
+        version_name = apk.get_androidversion_name()
 
         # 构建新文件名
         new_name = f"{package_name}^{version_name}.apk"
 
+        # 关闭apk文件
+        apk.zip.close()
+
         # 重命名apk文件
         os.rename(apk_path, os.path.join(output_dir, new_name))
 
-
+        
 # 定义更新apk版本的函数，遍历输出目录下的apk文件，并更新本地词典
 def update_apk_version(apk_version):
     # 遍历输出目录下的apk文件
@@ -173,7 +173,7 @@ def update_apk_name():
 
 def delete_files_and_folders():
     """删除指定的文件和文件夹"""
-    files_to_delete = ["payload.bin", "product.img"]
+    files_to_delete = ["payload.bin", "system.img"]
     folders_to_delete = ["output_img", "output_apk", "update_apk", "config"]
 
     for file in files_to_delete:

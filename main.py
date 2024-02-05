@@ -11,7 +11,7 @@ def parse_arguments():
                         help='Download ROM from given URL')
     parser.add_argument('-e', '--extract-payload', action='store_true',
                         help='Extract payload.bin from zip files')
-    parser.add_argument('-p', '--product-img', action='store_true',
+    parser.add_argument('-s', '--system-img', action='store_true',
                         help='Extract product.img from payload.bin')
     parser.add_argument('-r', '--erofs', action='store_true',
                         help='Extract files from EROFS product.img')
@@ -39,8 +39,8 @@ def main():
         download_rom(args.download)
     if args.extract_payload:
         extract_payload_bin(zip_files)
-    if args.product_img:
-        extract_product_img()
+    if args.system_img:
+        extract_system_img()
     if args.erofs:
         extract_erofs_product()
     if args.apk:
