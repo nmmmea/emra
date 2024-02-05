@@ -57,7 +57,7 @@ def init_json():
 
 def download_rom(url):
     """从给定的URL下载ROM"""
-    subprocess.run(["wget", url])
+    subprocess.run(["aria2c", "-x16", "-s16",url])
 
 
 def extract_payload_bin(zip_files):
