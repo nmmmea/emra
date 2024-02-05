@@ -70,9 +70,9 @@ def extract_system_img():
     # 使用subprocess模块运行shell命令，执行payload-dumper-go的命令，从payload.bin文件中提取system镜像文件
     # -c参数指定最大并发数为8，-output指定提取后的文件输出到output_img目录下
     # -p参数指定提取system镜像，"payload.bin"为输入文件
-    subprocess.run(["./payload-dumper-go", "-c", "8", "-output",
-                    "output_img", "-p", "system", "payload.bin"])
-
+    subprocess.run(["payload-dumper-go", "-c", "8", "-output",
+                    "output_img", "-p", "my_product,my_stock,my_bigball,my_heytap,system_ext", "payload.bin"])
+        
     # 循环遍历output_img目录下的所有文件，执行os.rename函数将提取的文件移动到当前目录下
     for filename in os.listdir("output_img"):
         src_path = os.path.join("output_img", filename)
