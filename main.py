@@ -12,9 +12,9 @@ def parse_arguments():
     parser.add_argument('-e', '--extract-payload', action='store_true',
                         help='Extract payload.bin from zip files')
     parser.add_argument('-s', '--system-img', action='store_true',
-                        help='Extract product.img from payload.bin')
+                        help='Extract system.img from payload.bin')
     parser.add_argument('-r', '--erofs', action='store_true',
-                        help='Extract files from EROFS product.img')
+                        help='Extract files from EROFS system.img')
     parser.add_argument('-a', '--apk', action='store_true',
                         help='Remove specified APKs')
     parser.add_argument('-n', '--rename', action='store_true',
@@ -33,7 +33,7 @@ def main():
     args = parse_arguments()
 
     init_folder()
-    exclude_apk, apk_version = init_json()
+    exclude_apk, apk_version, apk_code, apk_code_name = init_json()
 
     if args.download:
         download_rom(args.download)
@@ -42,13 +42,13 @@ def main():
     if args.system_img:
         extract_system_img()
     if args.erofs:
-        extract_erofs_product()
+        extract_erofs_system()
     if args.apk:
         remove_some_apk(exclude_apk)
     if args.rename:
         rename_apk(apk_files)
     if args.update_version:
-        update_apk_version(apk_version)
+        update_apk_version(apk_version, apk_code, apk_code_name)
     if args.update_name:
         update_apk_name()
     if args.clean:
